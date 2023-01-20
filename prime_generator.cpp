@@ -3,17 +3,21 @@
 #include <vector>
 #include <cmath>
 #include <climits>
+#include <mutex>
+
+std::mutex primes_mutex;
 
 void check_primes(int start, int end, std::vector<int>& primes) {
-    for (int i = start; i <= end; i += 2) { // Only checking odd numbers 
+    for (int i = start; i <= end; i += 2) { 
         bool is_prime = true;
-        for (int j = 3; j <= sqrt(i); j += 2) { // Only checking odd divisors
+        for (int j = 3; j <= sqrt(i); j += 2) {
             if (i % j == 0) {
                 is_prime = false;
                 break;
             }
         }
         if (is_prime) {
+            std::lock_guard<std::mutex> lock(primes_mutex);
             primes.push_back(i);
         }
     }
@@ -22,12 +26,10 @@ void check_primes(int start, int end, std::vector<int>& primes) {
 int main() {
     int start, end;
     std::cout << "Enter the range of numbers to check for primes (start end): ";
-    // Using safer input method
     if(!(std::cin >> start >> end)){
         std::cerr << "Invalid input\n";
         return 1;
     }
-    //Checking range of the input numbers
     if(start < 0 || end < start || end > INT_MAX){
         std::cerr << "Invalid range\n";
         return 1;
